@@ -30,7 +30,7 @@ func main() {
 	defer mp.Shutdown(ctx)
 
 	// Create metrics
-	meter := otel.Meter("demo-app")
+	meter := otel.Meter(ServiceName)
 	requestCounter, err := meter.Int64Counter("http_requests_total",
 		metric.WithDescription("Total number of HTTP requests"))
 	if err != nil {

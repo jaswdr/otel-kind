@@ -5,10 +5,10 @@ RUN apk add --no-cache git
 WORKDIR /app
 
 COPY go.mod ./
-COPY main.go ./
+COPY *.go ./
 RUN go mod tidy
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o demo-app main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o demo-app .
 
 FROM alpine:latest
 

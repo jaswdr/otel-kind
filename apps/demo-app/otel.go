@@ -25,8 +25,8 @@ func InitTracer(ctx context.Context, endpoint string) (*sdktrace.TracerProvider,
 
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceNameKey.String("demo-app"),
-			semconv.ServiceVersionKey.String("2.0.0"),
+			semconv.ServiceNameKey.String(ServiceName),
+			semconv.ServiceVersionKey.String(ServiceVersion),
 		),
 	)
 	if err != nil {
@@ -58,8 +58,8 @@ func InitMeter(ctx context.Context, endpoint string) (*sdkmetric.MeterProvider, 
 
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceNameKey.String("demo-app"),
-			semconv.ServiceVersionKey.String("2.0.0"),
+			semconv.ServiceNameKey.String(ServiceName),
+			semconv.ServiceVersionKey.String(ServiceVersion),
 		),
 	)
 	if err != nil {
