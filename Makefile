@@ -89,7 +89,7 @@ deploy-helm: ## Deploy all Helm charts (Grafana, Tempo, Loki, Mimir)
 		--wait
 	@echo ""
 	@echo "Deploying OTEL Collector..."
-	@kubectl apply -f infrastructure/kubernetes/otel-collector/deployment.yaml
+	@kubectl apply -f infrastructure/k8s/otel-collector.yaml
 	@kubectl wait --for=condition=ready pod -l app=otel-collector -n $(NAMESPACE_LGTM) --timeout=120s || true
 	@echo "✓ Helm charts deployed"
 
@@ -99,20 +99,20 @@ deploy-apps: deploy-postgres deploy-demo-app ## Deploy all applications
 
 deploy-postgres: ## Deploy PostgreSQL database
 	@echo "Deploying PostgreSQL to $(NAMESPACE_APP) namespace..."
-	@kubectl apply -f infrastructure/kubernetes/postgres/deployment.yaml
+	@kubectl apply -f infrastructure/k8s/postgres.yaml
 	@echo "Waiting for PostgreSQL to be ready..."
 	@kubectl wait --for=condition=ready pod -l app=postgres -n $(NAMESPACE_APP) --timeout=120s || true
 	@echo "✓ PostgreSQL deployed"
 
 deploy-demo-app: build-demo-app load-demo-app ## Build and deploy demo application
 	@echo "Deploying demo-app to $(NAMESPACE_APP) namespace..."
-	@kubectl apply -f infrastructure/kubernetes/demo-app/deployment.yaml
+	@kubectl apply -f infrastructure/k8s/demo-app.yaml
 	@kubectl wait --for=condition=ready pod -l app=demo-app -n $(NAMESPACE_APP) --timeout=120s || true
 	@echo "✓ Demo app deployed"
 
 deploy-load-generator: ## Deploy continuous load generator
 	@echo "Deploying load generator to $(NAMESPACE_APP) namespace..."
-	@kubectl apply -f infrastructure/kubernetes/load-generator/deployment.yaml
+	@kubectl apply -f infrastructure/k8s/load-generator.yaml
 	@kubectl wait --for=condition=ready pod -l app=load-generator -n $(NAMESPACE_APP) --timeout=60s || true
 	@echo "✓ Load generator deployed"
 
@@ -166,14 +166,14 @@ clean: clean-apps clean-infra ## Clean everything except namespaces
 
 clean-apps: ## Remove applications from default namespace
 	@echo "Removing applications from $(NAMESPACE_APP) namespace..."
-	@kubectl delete -f infrastructure/kubernetes/demo-app/deployment.yaml --ignore-not-found=true
-	@kubectl delete -f infrastructure/kubernetes/postgres/deployment.yaml --ignore-not-found=true
-	@kubectl delete -f infrastructure/kubernetes/load-generator/deployment.yaml --ignore-not-found=true
+	@kubectl delete -f infrastructure/k8s/demo-app.yaml --ignore-not-found=true
+	@kubectl delete -f infrastructure/k8s/postgres.yaml --ignore-not-found=true
+	@kubectl delete -f infrastructure/k8s/load-generator.yaml --ignore-not-found=true
 	@echo "✓ Applications removed"
 
 clean-infra: ## Remove infrastructure from lgtm namespace
 	@echo "Removing infrastructure from $(NAMESPACE_LGTM) namespace..."
-	@kubectl delete -f infrastructure/kubernetes/otel-collector/deployment.yaml --ignore-not-found=true
+	@kubectl delete -f infrastructure/k8s/otel-collector.yaml --ignore-not-found=true
 	@helm uninstall grafana -n $(NAMESPACE_LGTM) --ignore-not-found || true
 	@helm uninstall tempo -n $(NAMESPACE_LGTM) --ignore-not-found || true
 	@helm uninstall loki -n $(NAMESPACE_LGTM) --ignore-not-found || true
