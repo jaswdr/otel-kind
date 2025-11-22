@@ -63,28 +63,28 @@ deploy-helm: ## Deploy all Helm charts (Grafana, Tempo, Loki, Mimir)
 	@echo "Deploying Tempo..."
 	@helm upgrade --install tempo grafana/tempo \
 		-n $(NAMESPACE_LGTM) \
-		-f infrastructure/helm/tempo/values.yaml \
+		-f infrastructure/helm/tempo-values.yaml \
 		--timeout $(HELM_TIMEOUT) \
 		--wait
 	@echo ""
 	@echo "Deploying Loki..."
 	@helm upgrade --install loki grafana/loki \
 		-n $(NAMESPACE_LGTM) \
-		-f infrastructure/helm/loki/values.yaml \
+		-f infrastructure/helm/loki-values.yaml \
 		--timeout $(HELM_TIMEOUT) \
 		--wait
 	@echo ""
 	@echo "Deploying Mimir..."
 	@helm upgrade --install mimir grafana/mimir-distributed \
 		-n $(NAMESPACE_LGTM) \
-		-f infrastructure/helm/mimir/values.yaml \
+		-f infrastructure/helm/mimir-values.yaml \
 		--timeout $(HELM_TIMEOUT) \
 		--wait
 	@echo ""
 	@echo "Deploying Grafana..."
 	@helm upgrade --install grafana grafana/grafana \
 		-n $(NAMESPACE_LGTM) \
-		-f infrastructure/helm/grafana/values.yaml \
+		-f infrastructure/helm/grafana-values.yaml \
 		--timeout $(HELM_TIMEOUT) \
 		--wait
 	@echo ""
