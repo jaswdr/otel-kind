@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"log"
 	"time"
 
+	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -72,6 +74,11 @@ func InitMeter(ctx context.Context, endpoint string) (*sdkmetric.MeterProvider, 
 	)
 
 	otel.SetMeterProvider(mp)
+
+	// Start runtime metrics instrumentation
+	if err := runtime.Start(runtime.WithMinimumReadMemStatsInterval(time.Second)); err != nil {
+		log.Printf("Failed to start runtime instrumentation: %v", err)
+	}
 
 	return mp, nil
 }

@@ -8,35 +8,21 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
-
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/trace"
 )
 
 type Handler struct {
-	db             *sql.DB
-	requestCounter metric.Int64Counter
-	requestLatency metric.Float64Histogram
+	db *sql.DB
 }
 
-func NewHandler(db *sql.DB, requestCounter metric.Int64Counter, requestLatency metric.Float64Histogram) *Handler {
+func NewHandler(db *sql.DB) *Handler {
 	return &Handler{
-		db:             db,
-		requestCounter: requestCounter,
-		requestLatency: requestLatency,
+		db: db,
 	}
 }
 
 func (h *Handler) HandleRequest(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 	ctx := r.Context()
-
-	span := trace.SpanFromContext(ctx)
-	span.SetAttributes(
-		attribute.String("http.method", r.Method),
-		attribute.String("http.url", r.URL.Path),
-	)
 
 	log.Printf("Request: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
 
@@ -55,8 +41,6 @@ func (h *Handler) HandleRequest(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error creating order: %v", err)
 		}
 	}
-
-	h.recordMetrics(ctx, r, start)
 
 	latency := time.Since(start).Seconds()
 	log.Printf("Request completed in %.2fms", latency*1000)
@@ -80,16 +64,6 @@ func (h *Handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "OK\n")
-}
-
-func (h *Handler) recordMetrics(ctx context.Context, r *http.Request, start time.Time) {
-	attrs := metric.WithAttributes(
-		attribute.String("method", r.Method),
-		attribute.String("path", r.URL.Path),
-	)
-
-	h.requestCounter.Add(ctx, 1, attrs)
-	h.requestLatency.Record(ctx, time.Since(start).Seconds(), attrs)
 }
 
 func doWork(ctx context.Context, duration time.Duration) {

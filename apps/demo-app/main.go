@@ -6,8 +6,6 @@ import (
 	"net/http"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/metric"
 )
 
 func main() {
@@ -29,20 +27,6 @@ func main() {
 	}
 	defer mp.Shutdown(ctx)
 
-	// Create metrics
-	meter := otel.Meter(ServiceName)
-	requestCounter, err := meter.Int64Counter("http_requests_total",
-		metric.WithDescription("Total number of HTTP requests"))
-	if err != nil {
-		log.Fatalf("Failed to create counter: %v", err)
-	}
-
-	requestLatency, err := meter.Float64Histogram("http_request_duration_seconds",
-		metric.WithDescription("HTTP request latency in seconds"))
-	if err != nil {
-		log.Fatalf("Failed to create histogram: %v", err)
-	}
-
 	// Initialize database
 	db, err := InitDatabase(ctx, cfg)
 	if err != nil {
@@ -51,11 +35,11 @@ func main() {
 	defer db.Close()
 
 	// Create handler
-	handler := NewHandler(db, requestCounter, requestLatency)
+	handler := NewHandler(db)
 
-	// Setup routes
+	// Setup routes with automatic instrumentation
 	http.Handle("/", otelhttp.NewHandler(http.HandlerFunc(handler.HandleRequest), "handleRequest"))
-	http.HandleFunc("/health", handler.HealthCheck)
+	http.Handle("/health", otelhttp.NewHandler(http.HandlerFunc(handler.HealthCheck), "healthCheck"))
 
 	// Start server
 	log.Printf("Starting server on :%s", cfg.Port)
