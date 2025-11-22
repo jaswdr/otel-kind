@@ -63,33 +63,33 @@ deploy-helm: ## Deploy all Helm charts (Grafana, Tempo, Loki, Mimir)
 	@echo "Deploying Tempo..."
 	@helm upgrade --install tempo grafana/tempo \
 		-n $(NAMESPACE_LGTM) \
-		-f infrastructure/helm/tempo-values.yaml \
+		-f infra/helm/tempo-values.yaml \
 		--timeout $(HELM_TIMEOUT) \
 		--wait
 	@echo ""
 	@echo "Deploying Loki..."
 	@helm upgrade --install loki grafana/loki \
 		-n $(NAMESPACE_LGTM) \
-		-f infrastructure/helm/loki-values.yaml \
+		-f infra/helm/loki-values.yaml \
 		--timeout $(HELM_TIMEOUT) \
 		--wait
 	@echo ""
 	@echo "Deploying Mimir..."
 	@helm upgrade --install mimir grafana/mimir-distributed \
 		-n $(NAMESPACE_LGTM) \
-		-f infrastructure/helm/mimir-values.yaml \
+		-f infra/helm/mimir-values.yaml \
 		--timeout $(HELM_TIMEOUT) \
 		--wait
 	@echo ""
 	@echo "Deploying Grafana..."
 	@helm upgrade --install grafana grafana/grafana \
 		-n $(NAMESPACE_LGTM) \
-		-f infrastructure/helm/grafana-values.yaml \
+		-f infra/helm/grafana-values.yaml \
 		--timeout $(HELM_TIMEOUT) \
 		--wait
 	@echo ""
 	@echo "Deploying OTEL Collector..."
-	@kubectl apply -f infrastructure/k8s/01-otel-collector.yaml
+	@kubectl apply -f infra/k8s/01-otel-collector.yaml
 	@kubectl wait --for=condition=ready pod -l app=otel-collector -n $(NAMESPACE_LGTM) --timeout=120s || true
 	@echo "✓ Helm charts deployed"
 
@@ -99,20 +99,20 @@ deploy-apps: deploy-postgres deploy-demo-app ## Deploy all applications
 
 deploy-postgres: ## Deploy PostgreSQL database
 	@echo "Deploying PostgreSQL to $(NAMESPACE_APP) namespace..."
-	@kubectl apply -f infrastructure/k8s/02-postgres.yaml
+	@kubectl apply -f infra/k8s/02-postgres.yaml
 	@echo "Waiting for PostgreSQL to be ready..."
 	@kubectl wait --for=condition=ready pod -l app=postgres -n $(NAMESPACE_APP) --timeout=120s || true
 	@echo "✓ PostgreSQL deployed"
 
 deploy-demo-app: build-demo-app load-demo-app ## Build and deploy demo application
 	@echo "Deploying demo-app to $(NAMESPACE_APP) namespace..."
-	@kubectl apply -f infrastructure/k8s/03-demo-app.yaml
+	@kubectl apply -f infra/k8s/03-demo-app.yaml
 	@kubectl wait --for=condition=ready pod -l app=demo-app -n $(NAMESPACE_APP) --timeout=120s || true
 	@echo "✓ Demo app deployed"
 
 deploy-load-generator: ## Deploy continuous load generator
 	@echo "Deploying load generator to $(NAMESPACE_APP) namespace..."
-	@kubectl apply -f infrastructure/k8s/04-load-generator.yaml
+	@kubectl apply -f infra/k8s/04-load-generator.yaml
 	@kubectl wait --for=condition=ready pod -l app=load-generator -n $(NAMESPACE_APP) --timeout=60s || true
 	@echo "✓ Load generator deployed"
 
@@ -135,7 +135,7 @@ port-forward: ## Start port forwarding to Grafana
 
 verify: ## Run verification script
 	@echo "Running verification..."
-	@./scripts/verify.sh
+	@./hacks/verify.sh
 
 status: ## Show status of all pods
 	@echo "Pods in $(NAMESPACE_LGTM) namespace (LGTM Stack):"
@@ -166,14 +166,14 @@ clean: clean-apps clean-infra ## Clean everything except namespaces
 
 clean-apps: ## Remove applications from default namespace
 	@echo "Removing applications from $(NAMESPACE_APP) namespace..."
-	@kubectl delete -f infrastructure/k8s/03-demo-app.yaml --ignore-not-found=true
-	@kubectl delete -f infrastructure/k8s/02-postgres.yaml --ignore-not-found=true
-	@kubectl delete -f infrastructure/k8s/04-load-generator.yaml --ignore-not-found=true
+	@kubectl delete -f infra/k8s/03-demo-app.yaml --ignore-not-found=true
+	@kubectl delete -f infra/k8s/02-postgres.yaml --ignore-not-found=true
+	@kubectl delete -f infra/k8s/04-load-generator.yaml --ignore-not-found=true
 	@echo "✓ Applications removed"
 
 clean-infra: ## Remove infrastructure from lgtm namespace
 	@echo "Removing infrastructure from $(NAMESPACE_LGTM) namespace..."
-	@kubectl delete -f infrastructure/k8s/01-otel-collector.yaml --ignore-not-found=true
+	@kubectl delete -f infra/k8s/01-otel-collector.yaml --ignore-not-found=true
 	@helm uninstall grafana -n $(NAMESPACE_LGTM) --ignore-not-found || true
 	@helm uninstall tempo -n $(NAMESPACE_LGTM) --ignore-not-found || true
 	@helm uninstall loki -n $(NAMESPACE_LGTM) --ignore-not-found || true
