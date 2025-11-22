@@ -37,7 +37,13 @@
       "Bash(kubectl port-forward:*)",
       "Bash(/tmp/verify-setup.sh:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(/tmp/test-loki-logs.sh)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(tree:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
