@@ -15,14 +15,7 @@ help: ## Show this help message
 # Cluster Management
 create-cluster: ## Create a new Kind cluster
 	@echo "Creating Kind cluster: $(CLUSTER_NAME)..."
-	@kind create cluster --name $(CLUSTER_NAME) --config - <<EOF || true\n\
-	kind: Cluster\n\
-	apiVersion: kind.x-k8s.io/v1alpha4\n\
-	nodes:\n\
-	- role: control-plane\n\
-	- role: worker\n\
-	- role: worker\n\
-	EOF
+	@kind create cluster --name $(CLUSTER_NAME) --config infra/kind-cluster.yaml || true
 	@echo "✓ Cluster $(CLUSTER_NAME) created"
 	@kubectl cluster-info --context kind-$(CLUSTER_NAME)
 
