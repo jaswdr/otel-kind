@@ -1,0 +1,46 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go
+*.test
+*.out
+go.work
+go.work.sum
+apps/*/vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kubernetes
+*.kubeconfig
+kubeconfig
+
+# Helm
+charts/
+*.tgz
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+
+# Environment
+.env
+.env.local
+*.secret
+
+# Build artifacts
+dist/
+build/
+bin/

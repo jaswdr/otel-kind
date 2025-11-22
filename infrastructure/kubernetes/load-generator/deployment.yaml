@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+    spec:
+      containers:
+        - name: load-generator
+          image: curlimages/curl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Starting continuous load generator..."
+              echo "Target: http://demo-app.default.svc.cluster.local"
+
+              while true; do
+                # Make a request
+                RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://demo-app.default.svc.cluster.local/)
+                TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+                if [ "$RESPONSE_CODE" = "200" ]; then
+                  echo "[$TIMESTAMP] Request successful (HTTP $RESPONSE_CODE)"
+                else
+                  echo "[$TIMESTAMP] Request failed (HTTP $RESPONSE_CODE)"
+                fi
+
+                # Random sleep between 1-5 seconds
+                SLEEP_TIME=$((RANDOM % 5 + 1))
+                sleep $SLEEP_TIME
+              done
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "50m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"

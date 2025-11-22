@@ -1,0 +1,64 @@
+adminUser: admin
+adminPassword: admin
+
+initChownData:
+  enabled: false
+
+service:
+  type: NodePort
+  nodePort: 30000
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki-gateway.lgtm.svc.cluster.local
+        isDefault: false
+        jsonData:
+          maxLines: 1000
+      - name: Mimir
+        type: prometheus
+        access: proxy
+        url: http://mimir-gateway.lgtm.svc:80/prometheus
+        isDefault: true
+        jsonData:
+          timeInterval: 30s
+      - name: Tempo
+        type: tempo
+        access: proxy
+        url: http://tempo.lgtm.svc.cluster.local:3200
+        isDefault: false
+        jsonData:
+          tracesToLogsV2:
+            datasourceUid: 'loki'
+          tracesToMetrics:
+            datasourceUid: 'mimir'
+          serviceMap:
+            datasourceUid: 'mimir'
+          nodeGraph:
+            enabled: true
+      - name: PostgreSQL
+        type: postgres
+        access: proxy
+        url: postgres.default.svc.cluster.local:5432
+        database: demoapp
+        user: demouser
+        isDefault: false
+        editable: true
+        secureJsonData:
+          password: demopass
+        jsonData:
+          database: demoapp
+          sslmode: disable
+          postgresVersion: 1600
+          timescaledb: false
+          maxOpenConns: 100
+          maxIdleConns: 100
+          connMaxLifetime: 14400
+
+persistence:
+  enabled: true
+  size: 5Gi

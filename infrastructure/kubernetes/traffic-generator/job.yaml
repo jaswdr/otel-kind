@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: traffic-generator
+  namespace: lgtm
+spec:
+  template:
+    spec:
+      containers:
+        - name: curl
+          image: curlimages/curl
+          command:
+            - sh
+            - -c
+            - |
+              for i in $(seq 1 50); do
+                curl http://demo-app.lgtm.svc.cluster.local/
+                sleep 2
+              done
+      restartPolicy: Never
+  backoffLimit: 1
