@@ -43,7 +43,9 @@
       "Bash(git push:*)",
       "Bash(git fetch:*)",
       "Bash(tree:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(go build:*)",
+      "Bash(go mod tidy:*)"
     ],
     "deny": [],
     "ask": []
